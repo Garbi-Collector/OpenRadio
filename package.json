@@ -1,5 +1,5 @@
 {
-  "name": "open-radio",
+  "name": "radish-open-radio",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy:gh": "ng build --output-path dist/OpenRadio --base-href \"https://garbi-collector.github.io/OpenRadio/\" && npx angular-cli-ghpages --dir=dist/OpenRadio/browser"
+    "deploy:gh": "ng build --output-path dist/RadishOpenRadio --base-href \"https://garbi-collector.github.io/RadishOpenRadio/\" && npx angular-cli-ghpages --dir=dist/RadishOpenRadio/browser"
   },
   "private": true,
   "dependencies": {
