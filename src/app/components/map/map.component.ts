@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { RadioBrowserService } from '../../services/radio-browser.service';
 import { RadioStation, RadioStationLight } from '../../models/radio-browser.model';
 import { ThemeService } from '../../services/theme.service';
+import { Subject, takeUntil } from 'rxjs';
 
 declare const L: any;
 
@@ -13,13 +14,14 @@ declare const L: any;
   standalone: true,
   imports: [CommonModule],
   templateUrl: './map.component.html',
-  styleUrl: './map.component.scss'
+  styleUrl: './map.component.css'
 })
 export class MapComponent implements OnInit, OnDestroy {
   @Output() stationSelected = new EventEmitter<RadioStation>();
 
   private map: any;
   private markerClusterGroup: any;
+  private tileLayer: any; // ✅ Referencia al tile layer para poder cambiarlo
 
   // Almacenar estaciones ligeras para marcadores
   stations: RadioStationLight[] = [];
@@ -32,11 +34,16 @@ export class MapComponent implements OnInit, OnDestroy {
   totalCount = 0;
 
   // Control de carga progresiva
-  private currentLimit = 5000; // Empezar con 5000 radios top
+  private currentLimit = 5000;
   private hasMoreStations = true;
 
   // Theme control
   isDarkMode = false;
+  private destroy$ = new Subject<void>();
+
+  // ✅ URLs de los tiles
+  private readonly LIGHT_TILES = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  private readonly DARK_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
   constructor(
     private radioService: RadioBrowserService,
@@ -47,16 +54,22 @@ export class MapComponent implements OnInit, OnDestroy {
     // Obtener tema actual
     this.isDarkMode = this.themeService.isDarkMode();
 
-    // Suscribirse a cambios de tema
-    this.themeService.theme$.subscribe(theme => {
-      this.isDarkMode = theme === 'dark';
-    });
+    // ✅ Suscribirse a cambios de tema
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(theme => {
+        this.isDarkMode = theme === 'dark';
+        this.updateMapTiles(); // ✅ Actualizar tiles cuando cambia el tema
+      });
 
     this.initMap();
     this.loadInitialStations();
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+
     if (this.map) {
       this.map.remove();
     }
@@ -67,6 +80,27 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   toggleTheme(): void {
     this.themeService.toggleTheme();
+  }
+
+  /**
+   * ✅ Actualiza los tiles del mapa según el tema actual
+   */
+  private updateMapTiles(): void {
+    if (!this.map || !this.tileLayer) return;
+
+    // Remover el tile layer actual
+    this.map.removeLayer(this.tileLayer);
+
+    // Agregar el nuevo tile layer según el tema
+    const tileUrl = this.isDarkMode ? this.DARK_TILES : this.LIGHT_TILES;
+
+    this.tileLayer = L.tileLayer(tileUrl, {
+      attribution: '© OpenStreetMap contributors',
+      noWrap: false,
+      bounds: undefined
+    }).addTo(this.map);
+
+    console.log(`🗺️ Mapa actualizado a modo ${this.isDarkMode ? 'oscuro' : 'claro'}`);
   }
 
   private initMap(): void {
@@ -82,7 +116,10 @@ export class MapComponent implements OnInit, OnDestroy {
       attributionControl: false
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // ✅ Inicializar con el tile layer correcto según el tema actual
+    const initialTileUrl = this.isDarkMode ? this.DARK_TILES : this.LIGHT_TILES;
+
+    this.tileLayer = L.tileLayer(initialTileUrl, {
       attribution: '© OpenStreetMap contributors',
       noWrap: false,
       bounds: undefined
@@ -125,7 +162,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /**
    * Carga inicial: solo las top 5000 radios más votadas
-   * Esto reduce dramáticamente el tiempo de carga inicial
    */
   private loadInitialStations(): void {
     console.log('🌍 Cargando top 5000 radios más populares...');
@@ -155,21 +191,17 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /**
    * Detecta cambios en el viewport del mapa
-   * Puede usarse para cargar radios adicionales según la región visible
    */
   private onMapViewChange(): void {
     const zoom = this.map.getZoom();
 
-    // Solo cargar más estaciones si el zoom es alto (vista regional)
     if (zoom >= 6 && this.hasMoreStations && this.stations.length < 10000) {
       console.log('🔍 Zoom alto detectado, considerar carga de más radios...');
-      // Aquí podrías implementar carga adicional por región
     }
   }
 
   /**
    * Agrega marcadores usando datos ligeros
-   * Mucho más rápido que cargar datos completos
    */
   private addLightweightMarkers(): void {
     const radioIcon = L.icon({
@@ -305,7 +337,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Cargar detalles completos
     this.loadAndSelectStation(lightStation.stationuuid);
-    return null; // Se emitirá cuando se cargue
+    return null;
   }
 
   /**
