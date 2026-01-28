@@ -63,8 +63,8 @@
   padding: 12px 20px;
   border-radius: 25px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  pointer-events: none;
+  z-index: 500; // ✅ Reducido de 1000 a 500 para que quede debajo del sidebar (z-index: 1000)
+pointer-events: none;
 }
 
 .info-content {
@@ -82,8 +82,6 @@
   font-weight: 600;
   color: #333;
 }
-
-
 
 :host ::ng-deep {
   .marker-cluster {
@@ -144,19 +142,19 @@
     }
   }
 
-.custom-popup {
-  .leaflet-popup-content-wrapper {
-    border-radius: 12px;
-    padding: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  }
+  .custom-popup {
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
 
-  .leaflet-popup-content {
-    margin: 8px;
-  }
+    .leaflet-popup-content {
+      margin: 8px;
+    }
 
-  .leaflet-popup-tip {
-    background: white;
+    .leaflet-popup-tip {
+      background: white;
+    }
   }
-}
 }
