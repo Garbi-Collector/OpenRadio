@@ -1,9 +1,10 @@
 import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import * as L from 'leaflet';
-import 'leaflet.markercluster';
 import { RadioBrowserService } from '../../services/radio-browser.service';
 import { RadioStation } from '../../models/radio-browser.model';
+
+// Declarar L como variable global
+declare const L: any;
 
 @Component({
   selector: 'app-map',
@@ -15,8 +16,8 @@ import { RadioStation } from '../../models/radio-browser.model';
 export class MapComponent implements OnInit, OnDestroy {
   @Output() stationSelected = new EventEmitter<RadioStation>();
 
-  private map!: L.Map;
-  private markerClusterGroup!: L.MarkerClusterGroup;
+  private map: any;
+  private markerClusterGroup: any;
 
   stations: RadioStation[] = [];
   isLoading = true;
@@ -60,9 +61,9 @@ export class MapComponent implements OnInit, OnDestroy {
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       spiderfyOnMaxZoom: true,
-      disableClusteringAtZoom: 10, // Se dispersan a partir del zoom 10
+      disableClusteringAtZoom: 10,
       maxClusterRadius: 80,
-      iconCreateFunction: (cluster) => {
+      iconCreateFunction: (cluster: any) => {
         const count = cluster.getChildCount();
         let size = 'small';
         let sizeNum = 40;
@@ -91,15 +92,13 @@ export class MapComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    // Cargar todas las estaciones que tienen coordenadas
     this.radioService.getStationsWithGeoInfo(100000).subscribe({
       next: (stations) => {
-        // Filtrar solo las que tienen coordenadas válidas
         this.stations = stations.filter(s =>
           s.geo_lat !== null &&
           s.geo_long !== null &&
           s.url_resolved &&
-          s.lastcheckok === 1 // Solo las que funcionan
+          s.lastcheckok === 1
         );
 
         this.totalCount = this.stations.length;
@@ -138,7 +137,6 @@ export class MapComponent implements OnInit, OnDestroy {
           { icon: radioIcon }
         );
 
-        // Popup con información mejorada
         const popupContent = `
           <div style="text-align: center; min-width: 180px; font-family: system-ui;">
             <img
@@ -169,14 +167,11 @@ export class MapComponent implements OnInit, OnDestroy {
           className: 'custom-popup'
         });
 
-        // Click en el marcador
         marker.on('click', () => {
           this.stationSelected.emit(station);
-          // Registrar el click en la API
           this.radioService.registerClick(station.stationuuid).subscribe();
         });
 
-        // Agregar al cluster group
         this.markerClusterGroup.addLayer(marker);
 
         this.loadedCount = index + 1;
@@ -185,7 +180,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
     console.log(`✅ ${this.loadedCount} marcadores agregados al mapa`);
 
-    // Exponer función global para el botón del popup
     (window as any).playStation = (uuid: string) => {
       const station = this.stations.find(s => s.stationuuid === uuid);
       if (station) {
@@ -200,7 +194,6 @@ export class MapComponent implements OnInit, OnDestroy {
     return text.substring(0, maxLength) + '...';
   }
 
-  // Método público para obtener una radio random
   getRandomStation(): RadioStation | null {
     if (this.stations.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * this.stations.length);
