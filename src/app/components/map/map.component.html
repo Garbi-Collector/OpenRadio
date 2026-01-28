@@ -16,7 +16,12 @@
   <!-- Info panel -->
   <div class="info-panel" *ngIf="!isLoading">
     <div class="info-content">
-      <span class="info-icon">📻</span>
+      <svg class="info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="8" width="20" height="14" rx="2"/>
+        <circle cx="8" cy="15" r="2"/>
+        <path d="M18 12h.01M18 15h.01M2 12h6"/>
+        <path d="m7 8 8-5"/>
+      </svg>
       <span class="info-text">{{ stations.length }} radios</span>
     </div>
   </div>

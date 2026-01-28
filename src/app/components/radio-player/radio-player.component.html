@@ -34,20 +34,41 @@
       <!-- Normal info -->
       <div class="station-details" *ngIf="!hasError && !isLoading">
         <span class="detail-item">
-          <strong>🌍</strong> {{ getStationLocation() }}
+          <!-- ✅ Globe icon en vez de 🌍 -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          {{ getStationLocation() }}
         </span>
         <span class="detail-item" *ngIf="currentTime">
-          <strong>🕐</strong> {{ currentTime }}
+          <!-- ✅ Clock icon en vez de 🕐 -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          {{ currentTime }}
         </span>
         <span class="detail-item" *ngIf="station.language">
-          <strong>🗣️</strong> {{ station.language }}
+          <!-- ✅ Language/Message icon en vez de 🗣️ -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+          </svg>
+          {{ station.language }}
         </span>
       </div>
 
       <div class="station-meta">
         <span class="meta-tag" *ngIf="station.codec">{{ station.codec }}</span>
         <span class="meta-tag" *ngIf="station.bitrate">{{ station.bitrate }}kbps</span>
-        <span class="meta-tag">❤️ {{ station.votes }}</span>
+        <span class="meta-tag">
+          <!-- ✅ Heart icon en vez de ❤️ -->
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 2px; vertical-align: middle;">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          {{ station.votes }}
+        </span>
       </div>
     </div>
 
@@ -103,15 +124,45 @@
   <!-- Status Bar -->
   <div class="status-bar" [class.playing]="isPlaying" [class.error]="hasError" [class.loading]="isLoading">
     <div class="status-indicator"></div>
-    <span *ngIf="!hasError && !isLoading">{{ isPlaying ? '🎵 Reproduciendo' : '⏸️ Pausado' }}</span>
-    <span *ngIf="isLoading && !hasError">⏳ Conectando...</span>
-    <span *ngIf="hasError">⚠️ {{ errorMessage }}</span>
+    <span *ngIf="!hasError && !isLoading">
+      <!-- ✅ Music note icon en vez de 🎵 -->
+      <svg *ngIf="isPlaying" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: middle;">
+        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+      </svg>
+      <!-- ✅ Pause icon en vez de ⏸️ -->
+      <svg *ngIf="!isPlaying" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: middle;">
+        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+      </svg>
+      {{ isPlaying ? 'Reproduciendo' : 'Pausado' }}
+    </span>
+    <span *ngIf="isLoading && !hasError">
+      <!-- ✅ Loading icon en vez de ⏳ -->
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: middle; animation: spin 1s linear infinite;">
+        <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+      </svg>
+      Conectando...
+    </span>
+    <span *ngIf="hasError">
+      <!-- ✅ Warning icon en vez de ⚠️ -->
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; vertical-align: middle;">
+        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+      </svg>
+      {{ errorMessage }}
+    </span>
   </div>
 </div>
 
 <div class="no-station" *ngIf="!station">
   <div class="no-station-content">
-    <div class="radio-icon">📻</div>
+    <div class="radio-icon">
+      <!-- ✅ Radio icon en vez de 📻 -->
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="8" width="20" height="14" rx="2"/>
+        <circle cx="8" cy="15" r="2"/>
+        <path d="M18 12h.01M18 15h.01M2 12h6"/>
+        <path d="m7 8 8-5"/>
+      </svg>
+    </div>
     <p>Selecciona una radio en el mapa</p>
     <button class="random-button-large" (click)="requestRandom()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

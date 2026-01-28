@@ -53,6 +53,11 @@
   display: flex;
   align-items: center;
   gap: 4px;
+
+svg {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
 }
 
 .station-meta {
@@ -67,6 +72,8 @@
   border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
 .controls {
@@ -130,6 +137,11 @@
   gap: 8px;
   font-size: 12px;
   font-weight: 600;
+
+span {
+  display: flex;
+  align-items: center;
+}
 }
 
 .status-indicator {
@@ -162,9 +174,15 @@
 
 .no-station-content {
   .radio-icon {
-    font-size: 48px;
     margin-bottom: 16px;
     animation: float 3s ease-in-out infinite;
+    display: flex;
+    justify-content: center;
+
+  svg {
+    color: #667eea;
+    opacity: 0.6;
+  }
   }
 
   p {
@@ -211,6 +229,7 @@
     transition: transform 0.3s ease;
   }
 }
+
 .favorite-button {
   width: 44px;
   height: 44px;
@@ -244,6 +263,7 @@
     transform: scale(0.95);
   }
 }
+
 .loading-spinner {
   position: absolute;
   top: 0;
@@ -321,9 +341,10 @@
     animation: none;
   }
 }
-   .station-icon {
-     position: relative;
-   }
+
+.station-icon {
+  position: relative;
+}
 
 .loading-overlay {
   position: absolute;
@@ -351,10 +372,6 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .error-badge,
@@ -388,33 +405,33 @@
   animation: spin 0.6s linear infinite;
 }
 
-   .play-button {
-     position: relative;
-     transition: all 0.3s ease;
+.play-button {
+  position: relative;
+  transition: all 0.3s ease;
 
-     &:disabled {
-       opacity: 0.7;
-       cursor: not-allowed;
-     }
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 
-     &.loading:not(.error) {
-       pointer-events: none;
-     }
+  &.loading:not(.error) {
+    pointer-events: none;
+  }
 
-     &.error {
-       background: rgba(255, 107, 107, 0.3);
-       animation: pulse-error 2s infinite;
+  &.error {
+    background: rgba(255, 107, 107, 0.3);
+    animation: pulse-error 2s infinite;
 
-       &:hover {
-         background: rgba(255, 107, 107, 0.4);
-         animation: none;
-       }
-     }
+    &:hover {
+      background: rgba(255, 107, 107, 0.4);
+      animation: none;
+    }
+  }
 
-     &.playing {
-       box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-     }
-   }
+  &.playing {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+}
 
 @keyframes pulse-error {
   0%, 100% { opacity: 1; }
@@ -430,32 +447,32 @@
   animation: spin 0.8s linear infinite;
 }
 
-   .status-bar {
-     transition: all 0.3s ease;
+.status-bar {
+  transition: all 0.3s ease;
 
-     &.loading {
-       background: rgba(255, 165, 0, 0.2);
+  &.loading {
+    background: rgba(255, 165, 0, 0.2);
 
-       .status-indicator {
-         background: #FFA500;
-         animation: pulse 1.5s infinite;
-       }
-     }
+    .status-indicator {
+      background: #FFA500;
+      animation: pulse 1.5s infinite;
+    }
+  }
 
-     &.error {
-       background: rgba(255, 107, 107, 0.2);
+  &.error {
+    background: rgba(255, 107, 107, 0.2);
 
-       .status-indicator {
-         background: #FF6B6B;
-         animation: pulse-error 2s infinite;
-       }
-     }
+    .status-indicator {
+      background: #FF6B6B;
+      animation: pulse-error 2s infinite;
+    }
+  }
 
-     &.playing .status-indicator {
-       background: #4ade80;
-       animation: pulse 2s infinite;
-     }
-   }
+  &.playing .status-indicator {
+    background: #4ade80;
+    animation: pulse 2s infinite;
+  }
+}
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
