@@ -1,0 +1,167 @@
+/* ==========================================
+   TEMA LIGHT MODE - CHERRY
+   ========================================== */
+:root[data-theme="light"], :root {
+  /* Colores principales de la paleta cherry */
+  --color-1: #CC0000;
+  --color-2: #CC0033;
+  --color-3: #CC0066;
+  --color-4: #CC0099;
+  --color-5: #CC00CC;
+  --color-6: #CC00FF;
+  --color-7: #FF00FF;
+  --color-8: #FF00CC;
+  --color-9: #FF0099;
+  --color-10: #FF0066;
+  --color-11: #FF0033;
+  --color-12: #FF0000;
+
+  /* Colores primarios para la aplicación */
+  --primary: var(--color-1);
+  --primary-light: var(--color-11);
+  --primary-dark: #990000;
+  --accent: var(--color-7);
+
+  /* Colores de fondo */
+  --background-primary: #FFFFFF;
+  --background-secondary: #F5F5F5;
+  --background-tertiary: #EBEBEB;
+  --background-hover: #E0E0E0;
+
+  /* Colores de superficie (cards, modales, etc) */
+  --surface: #FFFFFF;
+  --surface-elevated: #FAFAFA;
+  --surface-overlay: rgba(0, 0, 0, 0.05);
+
+  /* Colores de texto */
+  --text-primary: #1A1A1A;
+  --text-secondary: #4A4A4A;
+  --text-tertiary: #707070;
+  --text-disabled: #A0A0A0;
+  --text-on-primary: #FFFFFF;
+  --text-on-accent: #FFFFFF;
+
+  /* Colores de bordes */
+  --border-primary: #D0D0D0;
+  --border-secondary: #E5E5E5;
+  --border-focus: var(--color-1);
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Estados */
+  --success: #28A745;
+  --warning: #FFC107;
+  --error: #DC3545;
+  --info: #17A2B8;
+
+  /* Opacidades para overlays */
+  --overlay-light: rgba(0, 0, 0, 0.1);
+  --overlay-medium: rgba(0, 0, 0, 0.3);
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================
+   TEMA DARK MODE - CHERRY
+   ========================================== */
+:root[data-theme="dark"] {
+  /* Colores principales de la paleta cherry (ajustados para dark mode) */
+  --color-1: #FF3333;
+  --color-2: #FF3366;
+  --color-3: #FF3399;
+  --color-4: #FF33CC;
+  --color-5: #FF33FF;
+  --color-6: #CC66FF;
+  --color-7: #FF66FF;
+  --color-8: #FF66CC;
+  --color-9: #FF6699;
+  --color-10: #FF6666;
+  --color-11: #FF6633;
+  --color-12: #FF3300;
+
+  /* Colores primarios para la aplicación */
+  --primary: var(--color-1);
+  --primary-light: var(--color-11);
+  --primary-dark: #CC0000;
+  --accent: var(--color-7);
+
+  /* Colores de fondo */
+  --background-primary: #121212;
+  --background-secondary: #1E1E1E;
+  --background-tertiary: #2A2A2A;
+  --background-hover: #333333;
+
+  /* Colores de superficie (cards, modales, etc) */
+  --surface: #1E1E1E;
+  --surface-elevated: #252525;
+  --surface-overlay: rgba(255, 255, 255, 0.05);
+
+  /* Colores de texto */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --text-tertiary: #808080;
+  --text-disabled: #505050;
+  --text-on-primary: #FFFFFF;
+  --text-on-accent: #FFFFFF;
+
+  /* Colores de bordes */
+  --border-primary: #3A3A3A;
+  --border-secondary: #2A2A2A;
+  --border-focus: var(--color-1);
+
+  /* Sombras (más sutiles en dark mode) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+
+  /* Estados (ajustados para dark mode) */
+  --success: #4CAF50;
+  --warning: #FFB300;
+  --error: #F44336;
+  --info: #29B6F6;
+
+  /* Opacidades para overlays */
+  --overlay-light: rgba(255, 255, 255, 0.1);
+  --overlay-medium: rgba(255, 255, 255, 0.2);
+  --overlay-dark: rgba(255, 255, 255, 0.3);
+}
+
+/* ==========================================
+   TRANSICIONES SUAVES AL CAMBIAR TEMA
+   ========================================== */
+* {
+  transition: background-color 0.3s ease,
+  color 0.3s ease,
+  border-color 0.3s ease,
+  box-shadow 0.3s ease;
+}
+
+/* Excluir transiciones en elementos que necesitan animaciones rápidas */
+*:where(:not(.no-theme-transition)) {
+  transition-property: background-color, color, border-color, box-shadow;
+}
+
+/* ==========================================
+   UTILIDADES OPCIONALES
+   ========================================== */
+
+/* Clase helper para forzar texto en primary color */
+.text-primary-color {
+  color: var(--primary) !important;
+}
+
+/* Clase helper para backgrounds con primary color */
+.bg-primary-color {
+  background-color: var(--primary) !important;
+  color: var(--text-on-primary) !important;
+}
+
+/* Clase helper para superficies elevadas */
+.surface-elevated {
+  background-color: var(--surface-elevated);
+  box-shadow: var(--shadow-md);
+}
