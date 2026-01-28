@@ -1,17 +1,14 @@
-<!-- Toggle Button (siempre visible) -->
+<!-- Toggle Button (solo visible cuando el sidebar está cerrado) -->
 <button
   class="sidebar-toggle"
+  *ngIf="!isOpen"
   (click)="toggleSidebar()"
-  [class.open]="isOpen"
-  [title]="isOpen ? 'Cerrar favoritos' : 'Abrir favoritos'"
+  [title]="'Abrir favoritos'"
 >
-  <svg *ngIf="!isOpen" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
   </svg>
-  <svg *ngIf="isOpen" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-  </svg>
-  <span class="favorites-count" *ngIf="favorites.length > 0 && !isOpen">
+  <span class="favorites-count" *ngIf="favorites.length > 0">
     {{ favorites.length }}
   </span>
 </button>
@@ -38,14 +35,23 @@
     </button>
   </div>
 
-  <!-- Actions -->
-  <div class="sidebar-actions" *ngIf="favorites.length > 0">
-    <button class="action-button" (click)="exportFavorites()" title="Exportar favoritos">
+  <!-- Actions - ✅ SIEMPRE VISIBLE (no depende de favorites.length) -->
+  <div class="sidebar-actions">
+    <!-- Exportar solo si hay favoritos -->
+    <button
+      class="action-button"
+      (click)="exportFavorites()"
+      title="Exportar favoritos"
+      [disabled]="favorites.length === 0"
+      [class.disabled]="favorites.length === 0"
+    >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
       </svg>
       Exportar
     </button>
+
+    <!-- ✅ Importar SIEMPRE disponible -->
     <label class="action-button" title="Importar favoritos">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
@@ -58,7 +64,15 @@
         style="display: none;"
       />
     </label>
-    <button class="action-button danger" (click)="clearAll()" title="Eliminar todos">
+
+    <!-- Limpiar solo si hay favoritos -->
+    <button
+      class="action-button danger"
+      (click)="clearAll()"
+      title="Eliminar todos"
+      [disabled]="favorites.length === 0"
+      [class.disabled]="favorites.length === 0"
+    >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
       </svg>
@@ -112,8 +126,13 @@
 
   <!-- Empty State -->
   <div class="empty-state" *ngIf="favorites.length === 0">
-    <div class="empty-icon">⭐</div>
+    <div class="empty-icon">
+      <!-- ✅ SVG de estrella en vez de emoji -->
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+    </div>
     <h3>Sin favoritos aún</h3>
-    <p>Explora el mapa y agrega tus radios favoritas haciendo clic en la estrella</p>
+    <p>Explora el mapa y agrega tus radios favoritas haciendo clic en la estrella, o importa tu lista de favoritos</p>
   </div>
 </aside>

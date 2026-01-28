@@ -21,15 +21,6 @@
     box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
   }
 
-  &.open {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    transform: rotate(0);
-
-    &:hover {
-      transform: scale(1.1);
-    }
-  }
-
   svg {
     transition: transform 0.3s ease;
   }
@@ -74,24 +65,24 @@
   to { opacity: 1; }
 }
 
-   .favorites-sidebar {
-     position: fixed;
-     top: 0;
-     bottom: 0;
-     left: -400px;
-     width: 400px;
-     height: calc(100vh - var(--player-height));
-   background: white;
-     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
-     z-index: 1000;
-     display: flex;
-     flex-direction: column;
-     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.favorites-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: -400px;
+  width: 400px;
+  height: calc(100vh - var(--player-height));
+  background: white;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-     &.open {
-       left: 0;
-     }
-   }
+  &.open {
+    left: 0;
+  }
+}
 
 .sidebar-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -177,16 +168,23 @@
   color: #666;
   transition: all 0.2s ease;
 
-  &:hover {
+  &:hover:not(.disabled) {
     background: #f0f0f0;
     border-color: #667eea;
     color: #667eea;
   }
 
-  &.danger:hover {
+  &.danger:hover:not(.disabled) {
     border-color: #FF4444;
     color: #FF4444;
   }
+
+// ✅ Estilo para botones deshabilitados
+&.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 }
 
 .favorites-list {
@@ -347,6 +345,11 @@
   margin-bottom: 16px;
   opacity: 0.5;
   animation: float 3s ease-in-out infinite;
+
+// ✅ Estilo para el SVG
+svg {
+  color: #ccc;
+}
 }
 
 @keyframes float {

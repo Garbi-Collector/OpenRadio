@@ -119,6 +119,7 @@ export class FavoritesSidebarComponent {
     this.showNotification('📥 Favoritos exportados');
   }
 
+  // ✅ CORREGIDO: Ahora hace merge en vez de reemplazar completamente
   importFavorites(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -129,13 +130,30 @@ export class FavoritesSidebarComponent {
         try {
           const imported = JSON.parse(e.target?.result as string);
           if (Array.isArray(imported)) {
-            this.favorites = imported;
+            // ✅ Hacer merge: agregar solo las radios que no existen
+            let addedCount = 0;
+            imported.forEach(station => {
+              if (!this.isFavorite(station)) {
+                this.favorites.push(station);
+                addedCount++;
+              }
+            });
+
             this.saveFavorites();
-            this.showNotification('📤 Favoritos importados');
+
+            if (addedCount > 0) {
+              this.showNotification(`📤 ${addedCount} favorito(s) importado(s)`);
+            } else {
+              this.showNotification('ℹ️ No hay nuevos favoritos para importar');
+            }
+          } else {
+            alert('Formato de archivo inválido');
           }
         } catch (error) {
           alert('Error al importar el archivo');
         }
+        // ✅ Limpiar el input para permitir reimportar el mismo archivo
+        input.value = '';
       };
       reader.readAsText(file);
     }
