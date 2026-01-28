@@ -1,9 +1,11 @@
+// components/map/map.component.ts
+
 import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RadioBrowserService } from '../../services/radio-browser.service';
-import { RadioStation } from '../../models/radio-browser.model';
+import { RadioStation, RadioStationLight } from '../../models/radio-browser.model';
+import { ThemeService } from '../../services/theme.service';
 
-// Declarar L como variable global
 declare const L: any;
 
 @Component({
@@ -18,16 +20,40 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private map: any;
   private markerClusterGroup: any;
-  stations: RadioStation[] = [];
+
+  // Almacenar estaciones ligeras para marcadores
+  stations: RadioStationLight[] = [];
+
+  // Cache de estaciones completas cargadas bajo demanda
+  private fullStationsCache = new Map<string, RadioStation>();
+
   isLoading = true;
   loadedCount = 0;
   totalCount = 0;
 
-  constructor(private radioService: RadioBrowserService) {}
+  // Control de carga progresiva
+  private currentLimit = 5000; // Empezar con 5000 radios top
+  private hasMoreStations = true;
+
+  // Theme control
+  isDarkMode = false;
+
+  constructor(
+    private radioService: RadioBrowserService,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit(): void {
+    // Obtener tema actual
+    this.isDarkMode = this.themeService.isDarkMode();
+
+    // Suscribirse a cambios de tema
+    this.themeService.theme$.subscribe(theme => {
+      this.isDarkMode = theme === 'dark';
+    });
+
     this.initMap();
-    this.loadAllStationsWithGeo();
+    this.loadInitialStations();
   }
 
   ngOnDestroy(): void {
@@ -36,8 +62,14 @@ export class MapComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Cambia entre light y dark mode
+   */
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
+
   private initMap(): void {
-    // Mapa con wrapping horizontal (circular infinito)
     this.map = L.map('map', {
       center: [20, 0],
       zoom: 2,
@@ -50,14 +82,12 @@ export class MapComponent implements OnInit, OnDestroy {
       attributionControl: false
     });
 
-    // Tile layer con wrapping infinito
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       noWrap: false,
       bounds: undefined
     }).addTo(this.map);
 
-    // Inicializar cluster group con opciones personalizadas
     this.markerClusterGroup = L.markerClusterGroup({
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
@@ -86,24 +116,34 @@ export class MapComponent implements OnInit, OnDestroy {
     });
 
     this.markerClusterGroup.addTo(this.map);
+
+    // Listener para cargar más estaciones al hacer zoom
+    this.map.on('zoomend moveend', () => {
+      this.onMapViewChange();
+    });
   }
 
-  private loadAllStationsWithGeo(): void {
-    console.log('🌍 Cargando TODAS las radios con coordenadas geográficas...');
+  /**
+   * Carga inicial: solo las top 5000 radios más votadas
+   * Esto reduce dramáticamente el tiempo de carga inicial
+   */
+  private loadInitialStations(): void {
+    console.log('🌍 Cargando top 5000 radios más populares...');
     this.isLoading = true;
 
-    this.radioService.getStationsWithGeoInfo(100000).subscribe({
+    this.radioService.getStationsLightweight(this.currentLimit).subscribe({
       next: (stations) => {
+        // Filtrar radios válidas
         this.stations = stations.filter(s =>
           s.geo_lat !== null &&
           s.geo_long !== null &&
-          s.url_resolved &&
           s.lastcheckok === 1
         );
 
         this.totalCount = this.stations.length;
-        console.log(`✅ ${this.totalCount} radios con coordenadas cargadas`);
-        this.addAllMarkers();
+        console.log(`✅ ${this.totalCount} radios cargadas (modo ligero)`);
+
+        this.addLightweightMarkers();
         this.isLoading = false;
       },
       error: (err) => {
@@ -113,11 +153,29 @@ export class MapComponent implements OnInit, OnDestroy {
     });
   }
 
-  private addAllMarkers(): void {
+  /**
+   * Detecta cambios en el viewport del mapa
+   * Puede usarse para cargar radios adicionales según la región visible
+   */
+  private onMapViewChange(): void {
+    const zoom = this.map.getZoom();
+
+    // Solo cargar más estaciones si el zoom es alto (vista regional)
+    if (zoom >= 6 && this.hasMoreStations && this.stations.length < 10000) {
+      console.log('🔍 Zoom alto detectado, considerar carga de más radios...');
+      // Aquí podrías implementar carga adicional por región
+    }
+  }
+
+  /**
+   * Agrega marcadores usando datos ligeros
+   * Mucho más rápido que cargar datos completos
+   */
+  private addLightweightMarkers(): void {
     const radioIcon = L.icon({
       iconUrl: 'data:image/svg+xml;base64,' + btoa(`
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" fill="#FF6B6B" stroke="#fff" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="10" fill="#FF487C" stroke="#fff" stroke-width="2.5"/>
           <circle cx="12" cy="12" r="4" fill="#fff"/>
           <circle cx="12" cy="12" r="6" fill="none" stroke="#fff" stroke-width="1" opacity="0.5"/>
         </svg>
@@ -136,30 +194,8 @@ export class MapComponent implements OnInit, OnDestroy {
           { icon: radioIcon }
         );
 
-        const popupContent = `
-          <div style="text-align: center; min-width: 180px; font-family: system-ui;">
-            <img
-              src="${station.favicon || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iI0ZGNkI2QiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IiNmZmYiLz48L3N2Zz4='}"
-              style="width: 50px; height: 50px; border-radius: 10px; margin-bottom: 10px; object-fit: cover; background: #f0f0f0;"
-              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iI0ZGNkI2QiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IiNmZmYiLz48L3N2Zz4='"
-            />
-            <div style="font-weight: 700; margin-bottom: 6px; font-size: 15px; color: #333;">${this.truncate(station.name, 30)}</div>
-            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
-              📍 ${station.country}${station.state ? ', ' + station.state : ''}
-            </div>
-            <div style="display: flex; justify-content: center; gap: 8px; font-size: 11px; color: #999; margin-top: 6px;">
-              <span style="background: #f0f0f0; padding: 3px 8px; border-radius: 10px;">${station.codec}</span>
-              <span style="background: #f0f0f0; padding: 3px 8px; border-radius: 10px;">${station.bitrate}kbps</span>
-              <span style="background: #f0f0f0; padding: 3px 8px; border-radius: 10px;">❤️ ${station.votes}</span>
-            </div>
-            <button
-              onclick="window.playStation('${station.stationuuid}')"
-              style="margin-top: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; width: 100%;"
-            >
-              ▶️ Reproducir
-            </button>
-          </div>
-        `;
+        // Popup ligero - carga detalles solo al hacer click
+        const popupContent = this.createLightPopup(station);
 
         marker.bindPopup(popupContent, {
           maxWidth: 220,
@@ -167,7 +203,7 @@ export class MapComponent implements OnInit, OnDestroy {
         });
 
         marker.on('click', () => {
-          this.selectStation(station);
+          this.loadAndSelectStation(station.stationuuid);
         });
 
         this.markerClusterGroup.addLayer(marker);
@@ -175,15 +211,70 @@ export class MapComponent implements OnInit, OnDestroy {
       }
     });
 
-    console.log(`✅ ${this.loadedCount} marcadores agregados al mapa`);
+    console.log(`✅ ${this.loadedCount} marcadores agregados`);
 
     // Exponer función global para el popup
     (window as any).playStation = (uuid: string) => {
-      const station = this.stations.find(s => s.stationuuid === uuid);
-      if (station) {
-        this.selectStation(station);
-      }
+      this.loadAndSelectStation(uuid);
     };
+  }
+
+  /**
+   * Crea un popup ligero sin todos los detalles
+   */
+  private createLightPopup(station: RadioStationLight): string {
+    return `
+      <div style="text-align: center; min-width: 180px; font-family: system-ui;">
+        <img
+          src="${station.favicon || this.getDefaultIcon()}"
+          style="width: 50px; height: 50px; border-radius: 10px; margin-bottom: 10px; object-fit: cover; background: #f0f0f0;"
+          onerror="this.src='${this.getDefaultIcon()}'"
+        />
+        <div style="font-weight: 700; margin-bottom: 6px; font-size: 15px;">
+          ${this.truncate(station.name, 30)}
+        </div>
+        <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">
+          📍 ${station.country}
+        </div>
+        <div style="display: flex; justify-content: center; gap: 8px; font-size: 11px; opacity: 0.7; margin-top: 6px;">
+          <span style="background: rgba(0,0,0,0.1); padding: 3px 8px; border-radius: 10px;">❤️ ${station.votes}</span>
+        </div>
+        <button
+          onclick="window.playStation('${station.stationuuid}')"
+          style="margin-top: 12px; background: linear-gradient(135deg, #FF6A98 0%, #FF376E 100%); color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; width: 100%;"
+        >
+          ▶️ Reproducir
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Carga los detalles completos de una estación bajo demanda
+   */
+  private loadAndSelectStation(uuid: string): void {
+    // Verificar cache primero
+    if (this.fullStationsCache.has(uuid)) {
+      const station = this.fullStationsCache.get(uuid)!;
+      this.selectStation(station);
+      return;
+    }
+
+    // Cargar desde API
+    console.log(`🔍 Cargando detalles de estación: ${uuid}`);
+    this.radioService.getStationByUuid(uuid).subscribe({
+      next: (stations) => {
+        if (stations && stations.length > 0) {
+          const station = stations[0];
+          // Guardar en cache
+          this.fullStationsCache.set(uuid, station);
+          this.selectStation(station);
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error cargando detalles de estación:', err);
+      }
+    });
   }
 
   /**
@@ -192,6 +283,10 @@ export class MapComponent implements OnInit, OnDestroy {
   private selectStation(station: RadioStation): void {
     this.stationSelected.emit(station);
     this.radioService.registerClick(station.stationuuid).subscribe();
+  }
+
+  private getDefaultIcon(): string {
+    return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iI0ZGNDg3QyIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IiNmZmYiLz48L3N2Zz4=';
   }
 
   private truncate(text: string, maxLength: number): string {
@@ -204,16 +299,28 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   getRandomStation(): RadioStation | null {
     if (this.stations.length === 0) return null;
+
     const randomIndex = Math.floor(Math.random() * this.stations.length);
-    return this.stations[randomIndex];
+    const lightStation = this.stations[randomIndex];
+
+    // Cargar detalles completos
+    this.loadAndSelectStation(lightStation.stationuuid);
+    return null; // Se emitirá cuando se cargue
   }
 
   /**
-   * Centra el mapa en una estación específica (útil para cuando se carga desde URL)
+   * Centra el mapa en una estación específica
    */
-  centerOnStation(station: RadioStation): void {
+  centerOnStation(station: RadioStation | RadioStationLight): void {
     if (station.geo_lat !== null && station.geo_long !== null) {
       this.map.setView([station.geo_lat, station.geo_long], 10);
     }
+  }
+
+  /**
+   * Obtiene una estación completa por UUID (para uso externo)
+   */
+  getStationByUuid(uuid: string): RadioStation | null {
+    return this.fullStationsCache.get(uuid) || null;
   }
 }

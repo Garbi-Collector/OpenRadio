@@ -1,3 +1,5 @@
+// models/radio-browser.model.ts
+
 export interface RadioStation {
   stationuuid: string;
   name: string;
@@ -27,4 +29,40 @@ export interface RadioStation {
   geo_lat: number | null;
   geo_long: number | null;
   has_extended_info?: boolean;
+}
+
+// Nuevo: Interfaz ligera para carga inicial (solo lo esencial)
+export interface RadioStationLight {
+  stationuuid: string;
+  name: string;
+  geo_lat: number | null;
+  geo_long: number | null;
+  country: string;
+  countrycode: string;
+  favicon: string;
+  votes: number;
+  lastcheckok: number;
+}
+
+// Parámetros de búsqueda para filtrar
+export interface StationSearchParams {
+  name?: string;
+  country?: string;
+  countrycode?: string;
+  state?: string;
+  language?: string;
+  tag?: string;
+  tagList?: string;
+  codec?: string;
+  bitrateMin?: number;
+  bitrateMax?: number;
+  order?: 'name' | 'url' | 'homepage' | 'favicon' | 'tags' | 'country' |
+    'state' | 'language' | 'votes' | 'codec' | 'bitrate' |
+    'lastcheckok' | 'lastchecktime' | 'clicktimestamp' |
+    'clickcount' | 'clicktrend' | 'random';
+  reverse?: boolean;
+  offset?: number;
+  limit?: number;
+  hidebroken?: boolean;
+  has_geo_info?: boolean;
 }
