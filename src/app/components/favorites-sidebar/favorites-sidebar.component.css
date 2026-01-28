@@ -179,7 +179,6 @@
     color: #FF4444;
   }
 
-// ✅ Estilo para botones deshabilitados
 &.disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -346,7 +345,6 @@
   opacity: 0.5;
   animation: float 3s ease-in-out infinite;
 
-// ✅ Estilo para el SVG
 svg {
   color: #ccc;
 }
