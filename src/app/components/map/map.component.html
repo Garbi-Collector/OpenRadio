@@ -1,0 +1,23 @@
+<div class="map-wrapper">
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Cargando radios del mundo...</p>
+      <p class="loading-count" *ngIf="totalCount > 0">
+        {{ loadedCount }} / {{ totalCount }} estaciones
+      </p>
+    </div>
+  </div>
+
+  <!-- Mapa -->
+  <div id="map"></div>
+
+  <!-- Info panel -->
+  <div class="info-panel" *ngIf="!isLoading">
+    <div class="info-content">
+      <span class="info-icon">📻</span>
+      <span class="info-text">{{ stations.length }} radios</span>
+    </div>
+  </div>
+</div>

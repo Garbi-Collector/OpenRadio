@@ -1,0 +1,16 @@
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.map-container {
+  flex: 1;
+  position: relative;
+}
+
+.player-container {
+  height: auto;
+  z-index: 1000;
+}

@@ -1,0 +1,70 @@
+<div class="radio-player" *ngIf="station">
+  <div class="player-content">
+    <!-- Station Icon -->
+    <div class="station-icon">
+      <img
+        [src]="station.favicon || 'assets/radio-placeholder.png'"
+        [alt]="station.name"
+        (error)="$any($event.target).src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iI0ZGNkI2QiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IiNmZmYiLz48L3N2Zz4='"
+      />
+    </div>
+
+    <!-- Station Info -->
+    <div class="station-info">
+      <h3 class="station-name">{{ station.name }}</h3>
+      <div class="station-details">
+        <span class="detail-item">
+          <strong>🌍</strong> {{ getStationLocation() }}
+        </span>
+        <span class="detail-item" *ngIf="currentTime">
+          <strong>🕐</strong> {{ currentTime }}
+        </span>
+        <span class="detail-item" *ngIf="station.language">
+          <strong>🗣️</strong> {{ station.language }}
+        </span>
+      </div>
+      <div class="station-meta">
+        <span class="meta-tag" *ngIf="station.codec">{{ station.codec }}</span>
+        <span class="meta-tag" *ngIf="station.bitrate">{{ station.bitrate }}kbps</span>
+        <span class="meta-tag">❤️ {{ station.votes }}</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="random-button" (click)="requestRandom()" title="Radio aleatoria">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+          <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+        </svg>
+      </button>
+
+      <button class="play-button" (click)="togglePlay()">
+        <svg *ngIf="!isPlaying" width="32" height="32" viewBox="0 0 24 24" fill="white">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <svg *ngIf="isPlaying" width="32" height="32" viewBox="0 0 24 24" fill="white">
+          <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Indicator -->
+  <div class="status-bar" [class.playing]="isPlaying">
+    <div class="status-indicator"></div>
+    <span>{{ isPlaying ? 'Reproduciendo' : 'Pausado' }}</span>
+  </div>
+</div>
+
+<div class="no-station" *ngIf="!station">
+  <div class="no-station-content">
+    <div class="radio-icon">📻</div>
+    <p>Selecciona una radio en el mapa</p>
+    <button class="random-button-large" (click)="requestRandom()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+      </svg>
+      Escuchar radio aleatoria
+    </button>
+  </div>
+</div>

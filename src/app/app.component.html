@@ -1,0 +1,12 @@
+<div class="app-container">
+  <div class="map-container">
+    <app-map (stationSelected)="onStationSelected($event)"></app-map>
+  </div>
+
+  <div class="player-container">
+    <app-radio-player
+      [station]="selectedStation"
+      (randomRequested)="onRandomRequested()"
+    ></app-radio-player>
+  </div>
+</div>
