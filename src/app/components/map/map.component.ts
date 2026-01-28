@@ -34,7 +34,7 @@ export class MapComponent implements OnInit, OnDestroy {
   totalCount = 0;
 
   // Control de carga progresiva
-  private currentLimit = 5000;
+  private currentLimit = 10000;
   private hasMoreStations = true;
 
   // Theme control
