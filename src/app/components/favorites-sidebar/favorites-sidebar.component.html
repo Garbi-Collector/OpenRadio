@@ -1,1 +1,119 @@
-<p>favorites-sidebar works!</p>
+<!-- Toggle Button (siempre visible) -->
+<button
+  class="sidebar-toggle"
+  (click)="toggleSidebar()"
+  [class.open]="isOpen"
+  [title]="isOpen ? 'Cerrar favoritos' : 'Abrir favoritos'"
+>
+  <svg *ngIf="!isOpen" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+  </svg>
+  <svg *ngIf="isOpen" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+  </svg>
+  <span class="favorites-count" *ngIf="favorites.length > 0 && !isOpen">
+    {{ favorites.length }}
+  </span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay" *ngIf="isOpen" (click)="toggleSidebar()"></div>
+
+<aside class="favorites-sidebar" [class.open]="isOpen">
+  <!-- Header -->
+  <div class="sidebar-header">
+    <div class="header-content">
+      <h2>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>
+        Favoritos
+      </h2>
+      <span class="count-badge">{{ favorites.length }}</span>
+    </div>
+    <button class="close-button" (click)="toggleSidebar()" title="Cerrar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Actions -->
+  <div class="sidebar-actions" *ngIf="favorites.length > 0">
+    <button class="action-button" (click)="exportFavorites()" title="Exportar favoritos">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+      </svg>
+      Exportar
+    </button>
+    <label class="action-button" title="Importar favoritos">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+      </svg>
+      Importar
+      <input
+        type="file"
+        accept=".json"
+        (change)="importFavorites($event)"
+        style="display: none;"
+      />
+    </label>
+    <button class="action-button danger" (click)="clearAll()" title="Eliminar todos">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+      </svg>
+      Limpiar
+    </button>
+  </div>
+
+  <!-- Favorites List -->
+  <div class="favorites-list" *ngIf="favorites.length > 0">
+    <div
+      class="favorite-item"
+      *ngFor="let station of favorites"
+      [class.playing]="currentStation?.stationuuid === station.stationuuid"
+      (click)="selectStation(station)"
+    >
+      <div class="station-image">
+        <img
+          [src]="station.favicon || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iI0ZGNkI2QiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IiNmZmYiLz48L3N2Zz4='"
+          [alt]="station.name"
+          (error)="$any($event.target).src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iI0ZGNkI2QiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IiNmZmYiLz48L3N2Zz4='"
+        />
+        <div class="playing-indicator" *ngIf="currentStation?.stationuuid === station.stationuuid">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div class="station-info">
+        <h3 class="station-name">{{ station.name }}</h3>
+        <p class="station-location">
+          {{ station.country }}{{ station.state ? ', ' + station.state : '' }}
+        </p>
+        <div class="station-tags">
+          <span class="tag" *ngIf="station.codec">{{ station.codec }}</span>
+          <span class="tag" *ngIf="station.bitrate">{{ station.bitrate }}kbps</span>
+        </div>
+      </div>
+
+      <button
+        class="remove-button"
+        (click)="removeFavorite(station); $event.stopPropagation()"
+        title="Eliminar de favoritos"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="favorites.length === 0">
+    <div class="empty-icon">⭐</div>
+    <h3>Sin favoritos aún</h3>
+    <p>Explora el mapa y agrega tus radios favoritas haciendo clic en la estrella</p>
+  </div>
+</aside>
