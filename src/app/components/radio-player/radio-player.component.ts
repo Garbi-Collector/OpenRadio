@@ -13,6 +13,7 @@ export class RadioPlayerComponent implements OnChanges, OnDestroy {
   @Input() station: RadioStation | null = null;
   @Input() isFavorite: boolean = false;
   @Output() randomRequested = new EventEmitter<void>();
+  @Input() autoplay: boolean = false;
   @Output() favoriteToggled = new EventEmitter<RadioStation>();
 
   isPlaying = false;
@@ -75,9 +76,6 @@ export class RadioPlayerComponent implements OnChanges, OnDestroy {
     this.audio.preload = 'none';
     this.audio.volume = 1;
 
-    // Intentar sin CORS primero (más compatible)
-    // this.audio.crossOrigin = 'anonymous';
-
     // Event: Comenzó a cargar
     this.audio.addEventListener('loadstart', () => {
       this.isLoading = true;
@@ -107,7 +105,6 @@ export class RadioPlayerComponent implements OnChanges, OnDestroy {
       this.isLoading = false;
       this.isPlaying = false;
 
-      // Solo mostrar error en consola en desarrollo
       if (this.retryCount === 0) {
         console.warn('⚠️ Error cargando radio:', this.station?.name);
       }
@@ -115,17 +112,23 @@ export class RadioPlayerComponent implements OnChanges, OnDestroy {
       this.handleAudioError();
     });
 
-    // Event: Pausado (no hacer nada, es normal)
+    // Event: Pausado
     this.audio.addEventListener('pause', () => {
       if (this.isPlaying) {
         this.isPlaying = false;
       }
     });
 
-    // Cargar y reproducir
+    // Cargar el audio
     this.audio.src = url;
     this.audio.load();
-    this.play();
+
+    // ✅ Solo intentar autoplay si está habilitado
+    if (this.autoplay) {
+      this.play();
+    } else {
+      this.isLoading = false; // Dejar en estado "listo para reproducir"
+    }
   }
 
   private handleAudioError(): void {
@@ -186,6 +189,7 @@ export class RadioPlayerComponent implements OnChanges, OnDestroy {
         .then(() => {
           this.isPlaying = true;
           this.isLoading = false;
+          console.log('✅ Reproduciendo:', this.station?.name);
         })
         .catch(err => {
           this.isLoading = false;
@@ -194,8 +198,11 @@ export class RadioPlayerComponent implements OnChanges, OnDestroy {
           if (err.name === 'NotSupportedError' || err.name === 'MediaError') {
             this.handleAudioError();
           } else if (err.name === 'NotAllowedError') {
-            // Error de autoplay, no es crítico
-            this.showError('Haz clic en ▶️ para reproducir');
+            // Error de autoplay - NO es un error crítico
+            console.log('⏸️ Autoplay bloqueado por el navegador');
+            // No mostrar error, solo dejar el botón play listo
+            this.hasError = false; // ← Importante: no marcar como error
+            this.isPlaying = false;
           }
           // Ignorar AbortError (es normal al cambiar de radio)
         });

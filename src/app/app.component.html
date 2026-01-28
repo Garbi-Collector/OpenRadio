@@ -1,20 +1,20 @@
 <div class="app-container">
-  <!-- Sidebar de favoritos -->
-  <app-favorites-sidebar
-    [currentStation]="selectedStation"
-    (stationSelected)="onStationSelected($event)"
-  ></app-favorites-sidebar>
+  <div class="main-row">
+    <app-favorites-sidebar
+      [currentStation]="selectedStation"
+      (stationSelected)="onStationSelected($event)"
+    ></app-favorites-sidebar>
 
-  <!-- Mapa -->
-  <div class="map-container">
-    <app-map (stationSelected)="onStationSelected($event)"></app-map>
+    <div class="map-container">
+      <app-map (stationSelected)="onStationSelected($event)"></app-map>
+    </div>
   </div>
 
-  <!-- Reproductor -->
   <div class="player-container">
     <app-radio-player
       [station]="selectedStation"
       [isFavorite]="isFavorite(selectedStation)"
+      [autoplay]="true"
       (randomRequested)="onRandomRequested()"
       (favoriteToggled)="onFavoriteToggled($event)"
     ></app-radio-player>

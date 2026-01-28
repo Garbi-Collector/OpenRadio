@@ -18,7 +18,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private map: any;
   private markerClusterGroup: any;
-
   stations: RadioStation[] = [];
   isLoading = true;
   loadedCount = 0;
@@ -46,7 +45,9 @@ export class MapComponent implements OnInit, OnDestroy {
       maxZoom: 18,
       worldCopyJump: true,
       maxBounds: undefined,
-      maxBoundsViscosity: 0
+      maxBoundsViscosity: 0,
+      zoomControl: false,
+      attributionControl: false
     });
 
     // Tile layer con wrapping infinito
@@ -89,7 +90,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private loadAllStationsWithGeo(): void {
     console.log('🌍 Cargando TODAS las radios con coordenadas geográficas...');
-
     this.isLoading = true;
 
     this.radioService.getStationsWithGeoInfo(100000).subscribe({
@@ -103,7 +103,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
         this.totalCount = this.stations.length;
         console.log(`✅ ${this.totalCount} radios con coordenadas cargadas`);
-
         this.addAllMarkers();
         this.isLoading = false;
       },
@@ -168,25 +167,31 @@ export class MapComponent implements OnInit, OnDestroy {
         });
 
         marker.on('click', () => {
-          this.stationSelected.emit(station);
-          this.radioService.registerClick(station.stationuuid).subscribe();
+          this.selectStation(station);
         });
 
         this.markerClusterGroup.addLayer(marker);
-
         this.loadedCount = index + 1;
       }
     });
 
     console.log(`✅ ${this.loadedCount} marcadores agregados al mapa`);
 
+    // Exponer función global para el popup
     (window as any).playStation = (uuid: string) => {
       const station = this.stations.find(s => s.stationuuid === uuid);
       if (station) {
-        this.stationSelected.emit(station);
-        this.radioService.registerClick(uuid).subscribe();
+        this.selectStation(station);
       }
     };
+  }
+
+  /**
+   * Selecciona una estación y emite el evento
+   */
+  private selectStation(station: RadioStation): void {
+    this.stationSelected.emit(station);
+    this.radioService.registerClick(station.stationuuid).subscribe();
   }
 
   private truncate(text: string, maxLength: number): string {
@@ -194,9 +199,21 @@ export class MapComponent implements OnInit, OnDestroy {
     return text.substring(0, maxLength) + '...';
   }
 
+  /**
+   * Obtiene una estación aleatoria del mapa
+   */
   getRandomStation(): RadioStation | null {
     if (this.stations.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * this.stations.length);
     return this.stations[randomIndex];
+  }
+
+  /**
+   * Centra el mapa en una estación específica (útil para cuando se carga desde URL)
+   */
+  centerOnStation(station: RadioStation): void {
+    if (station.geo_lat !== null && station.geo_long !== null) {
+      this.map.setView([station.geo_lat, station.geo_long], 10);
+    }
   }
 }

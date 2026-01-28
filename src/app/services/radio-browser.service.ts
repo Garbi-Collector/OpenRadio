@@ -7,7 +7,6 @@ import { RadioStation } from '../models/radio-browser.model';
   providedIn: 'root'
 })
 export class RadioBrowserService {
-
   private readonly BASE_URL = 'https://de1.api.radio-browser.info/json';
 
   constructor(private http: HttpClient) {}
@@ -35,6 +34,11 @@ export class RadioBrowserService {
       .set('reverse', 'true');
 
     return this.http.get<RadioStation[]>(`${this.BASE_URL}/stations/search`, { params });
+  }
+
+  // NUEVO: Obtener una estación específica por UUID
+  getStationByUuid(uuid: string): Observable<RadioStation[]> {
+    return this.http.get<RadioStation[]>(`${this.BASE_URL}/stations/byuuid/${uuid}`);
   }
 
   getStationsByCountry(country: string): Observable<RadioStation[]> {
@@ -68,7 +72,6 @@ export class RadioBrowserService {
     has_geo_info?: boolean;
     hidebroken?: boolean;
   }): Observable<RadioStation[]> {
-
     let params = new HttpParams();
 
     Object.entries(filters).forEach(([key, value]) => {

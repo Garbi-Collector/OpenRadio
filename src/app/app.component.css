@@ -5,12 +5,33 @@
   overflow: hidden;
 }
 
+.main-row {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.favorites-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: var(--player-height);
+  z-index: 900;
+  overflow: hidden;
+}
+.favorites-sidebar {
+  box-sizing: border-box;
+}
+
 .map-container {
   flex: 1;
   position: relative;
 }
-
 .player-container {
-  height: auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--player-height);
   z-index: 1000;
 }
