@@ -23,10 +23,10 @@ Con una interfaz moderna diseñada con la paleta **Radish** (rosa/fucsia vibrant
 ## 📸 Preview
 
 ### Modo Claro
-![Radish Open Radio - Light Mode](./docs/preview-light.png)
+![Radish Open Radio - Light Mode](docs/radish-lightmode.jpeg)
 
 ### Modo Oscuro
-![Radish Open Radio - Dark Mode](./docs/preview-dark.png)
+![Radish Open Radio - Dark Mode](docs/radish-darkmode.jpeg)
 
 ---
 
